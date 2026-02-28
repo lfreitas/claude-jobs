@@ -18,6 +18,7 @@ class AddEditTaskViewModel @Inject constructor(
     private val taskRepository: TaskRepository
 ) : ViewModel() {
 
+    // ── Schedule fields ────────────────────────────────────────────────────
     var name by mutableStateOf("")
     var prompt by mutableStateOf("")
     var scheduleType by mutableStateOf("DAILY")
@@ -28,6 +29,13 @@ class AddEditTaskViewModel @Inject constructor(
     var runAtEpochMillis by mutableLongStateOf(System.currentTimeMillis() + 3_600_000L)
     var nameError by mutableStateOf(false)
     var promptError by mutableStateOf(false)
+
+    // ── Capability fields ──────────────────────────────────────────────────
+    var systemPrompt by mutableStateOf("")
+    var maxTokens by mutableIntStateOf(4096)
+    var enableWebSearch by mutableStateOf(false)
+    var enableWebFetch by mutableStateOf(false)
+    var enableCodeExecution by mutableStateOf(false)
 
     private var editingTaskId: Long = 0L
     private var existingWorkName: String = ""
@@ -46,6 +54,12 @@ class AddEditTaskViewModel @Inject constructor(
                 dayOfWeek = task.dayOfWeek
                 intervalHours = task.intervalHours
                 runAtEpochMillis = task.runAtEpochMillis
+                // Capabilities
+                systemPrompt = task.systemPrompt
+                maxTokens = task.maxTokens
+                enableWebSearch = task.enableWebSearch
+                enableWebFetch = task.enableWebFetch
+                enableCodeExecution = task.enableCodeExecution
             }
         }
     }
@@ -67,7 +81,13 @@ class AddEditTaskViewModel @Inject constructor(
                 dayOfWeek = dayOfWeek,
                 intervalHours = intervalHours,
                 runAtEpochMillis = runAtEpochMillis,
-                workName = existingWorkName
+                workName = existingWorkName,
+                // Capabilities
+                systemPrompt = systemPrompt.trim(),
+                maxTokens = maxTokens.coerceIn(256, 128_000),
+                enableWebSearch = enableWebSearch,
+                enableWebFetch = enableWebFetch,
+                enableCodeExecution = enableCodeExecution,
             )
             taskRepository.saveTask(task)
             onSuccess()

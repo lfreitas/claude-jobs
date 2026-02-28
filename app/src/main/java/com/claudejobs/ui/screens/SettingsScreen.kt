@@ -74,7 +74,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             Text("Claude Model", style = MaterialTheme.typography.labelMedium)
             val models = listOf(
                 ApiKeyStore.DEFAULT_MODEL to "Haiku 4.5 (fast, economical)",
-                ApiKeyStore.MODEL_SONNET  to "Sonnet 4.6 (balanced)"
+                ApiKeyStore.MODEL_SONNET  to "Sonnet 4.6 (balanced)",
+                ApiKeyStore.MODEL_OPUS    to "Opus 4.6 (most capable)"
             )
             models.forEach { (modelId, label) ->
                 Row(
