@@ -28,7 +28,8 @@ class MessageRequestSerializationTest {
         )
         val obj = gson.toJson(request).asJsonObject()
         assertTrue("max_tokens key missing from JSON", obj.has("max_tokens"))
-        assertEquals(1024, obj["max_tokens"].asInt)
+        // Default is 4096 to give Claude enough room to use server-side tools
+        assertEquals(4096, obj["max_tokens"].asInt)
     }
 
     @Test

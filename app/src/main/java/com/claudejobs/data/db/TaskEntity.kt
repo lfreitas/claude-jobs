@@ -21,5 +21,21 @@ data class TaskEntity(
     val isEnabled: Boolean = true,
     /** WorkManager unique work name, e.g. "task_42" */
     val workName: String = "",
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+
+    // ── Claude Capabilities ──────────────────────────────────────────────────
+
+    /** Optional system prompt prepended to the Claude request. */
+    val systemPrompt: String = "",
+    /**
+     * Maximum tokens Claude may generate per run.
+     * 4096 is a safe default that allows tool-use loops without being wasteful.
+     */
+    val maxTokens: Int = 4096,
+    /** When true, supplies the web_search_20260209 server-side tool. */
+    val enableWebSearch: Boolean = false,
+    /** When true, supplies the web_fetch_20260209 server-side tool. */
+    val enableWebFetch: Boolean = false,
+    /** When true, supplies the code_execution_20260120 server-side tool. */
+    val enableCodeExecution: Boolean = false,
 )

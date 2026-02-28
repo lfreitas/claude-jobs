@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ fun AddEditTaskScreen(
     val isEditing = taskId > 0L
     var showTimePicker by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showAdvanced by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -77,7 +79,63 @@ fun AddEditTaskScreen(
                 maxLines = 8
             )
 
-            // Schedule type selector
+            // ── Claude Capabilities ────────────────────────────────────────────
+            Text("Claude Capabilities", style = MaterialTheme.typography.labelMedium)
+
+            CapabilityToggleRow(
+                label = "Web Search",
+                description = "Let Claude search the web for current information",
+                checked = viewModel.enableWebSearch,
+                onCheckedChange = { viewModel.enableWebSearch = it }
+            )
+
+            CapabilityToggleRow(
+                label = "Web Fetch",
+                description = "Let Claude fetch and read specific URLs",
+                checked = viewModel.enableWebFetch,
+                onCheckedChange = { viewModel.enableWebFetch = it }
+            )
+
+            CapabilityToggleRow(
+                label = "Code Execution",
+                description = "Let Claude run code (Python) to compute results",
+                checked = viewModel.enableCodeExecution,
+                onCheckedChange = { viewModel.enableCodeExecution = it }
+            )
+
+            // Advanced section (collapsible)
+            TextButton(
+                onClick = { showAdvanced = !showAdvanced },
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Text(if (showAdvanced) "▲ Hide advanced options" else "▼ Advanced options")
+            }
+
+            if (showAdvanced) {
+                OutlinedTextField(
+                    value = viewModel.systemPrompt,
+                    onValueChange = { viewModel.systemPrompt = it },
+                    label = { Text("System prompt (optional)") },
+                    placeholder = { Text("e.g. You are a concise assistant. Always respond in bullet points.") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 80.dp),
+                    maxLines = 6
+                )
+
+                OutlinedTextField(
+                    value = viewModel.maxTokens.toString(),
+                    onValueChange = { viewModel.maxTokens = it.toIntOrNull()?.coerceIn(256, 128_000) ?: 4096 },
+                    label = { Text("Max response tokens") },
+                    supportingText = { Text("256 – 128 000. Default 4096 (recommended for tool use)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+
+            // ── Schedule type selector ─────────────────────────────────────────
             Text("Schedule", style = MaterialTheme.typography.labelMedium)
             val scheduleTypes = listOf("DAILY", "WEEKLY", "INTERVAL", "ONE_TIME")
             val scheduleLabels = listOf("Daily", "Weekly", "Every N hours", "One time")
@@ -208,6 +266,34 @@ fun AddEditTaskScreen(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+}
+
+@Composable
+private fun CapabilityToggleRow(
+    label: String,
+    description: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.padding(start = 8.dp)
+        )
     }
 }
 

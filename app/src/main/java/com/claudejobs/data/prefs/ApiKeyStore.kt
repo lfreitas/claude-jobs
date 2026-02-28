@@ -26,8 +26,9 @@ class ApiKeyStore @Inject constructor(@ApplicationContext private val context: C
     companion object {
         private val API_KEY_PREF = stringPreferencesKey("enc_api_key")
         private val MODEL_PREF = stringPreferencesKey("model")
-        const val DEFAULT_MODEL = "claude-haiku-4-5-20251001"
-        const val MODEL_SONNET = "claude-sonnet-4-6"
+        const val DEFAULT_MODEL = "claude-haiku-4-5"  // Haiku 4.5 — fast, cost-effective
+        const val MODEL_SONNET  = "claude-sonnet-4-6" // Sonnet 4.6 — balanced
+        const val MODEL_OPUS    = "claude-opus-4-6"   // Opus 4.6  — most capable
     }
 
     private val aead: Aead by lazy {

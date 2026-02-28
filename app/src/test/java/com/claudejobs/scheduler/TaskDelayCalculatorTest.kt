@@ -1,9 +1,12 @@
 package com.claudejobs.scheduler
 
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import java.util.Calendar
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 /**
@@ -13,6 +16,19 @@ import java.util.concurrent.TimeUnit
  * regardless of when the test suite runs.
  */
 class TaskDelayCalculatorTest {
+
+    private lateinit var originalTimeZone: TimeZone
+
+    @Before
+    fun setUtcTimezone() {
+        originalTimeZone = TimeZone.getDefault()
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+    }
+
+    @After
+    fun restoreTimezone() {
+        TimeZone.setDefault(originalTimeZone)
+    }
 
     // ── computeDailyDelay ─────────────────────────────────────────────────────
 
@@ -63,14 +79,15 @@ class TaskDelayCalculatorTest {
 
     @Test
     fun `weekly delay rolls over to next week when target day and time have passed`() {
-        // now = Monday 14:00, target = Monday 10:00 → same day but past → 7 days
+        // now = Monday 14:00, target = Monday 10:00 → same day but past → next Monday 10:00
+        // delay = 7 days - 4 hours (target 10:00 is 4 h earlier in the day than now 14:00)
         val now = nextWeekdayAt(Calendar.MONDAY, hour = 14, minute = 0)
         val delay = TaskDelayCalculator.computeWeeklyDelay(
             dayOfWeek = 1,  // ISO 1 = Monday
             hour = 10, minute = 0,
             nowMillis = now
         )
-        assertEquals(TimeUnit.DAYS.toMillis(7), delay)
+        assertEquals(TimeUnit.DAYS.toMillis(7) - TimeUnit.HOURS.toMillis(4), delay)
     }
 
     @Test
