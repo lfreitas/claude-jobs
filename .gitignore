@@ -1,0 +1,17 @@
+# Gradle build cache and wrapper downloads
+.gradle/
+build/
+app/build/
+
+# Local Android SDK path (machine-specific)
+local.properties
+
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# OS files
+.DS_Store
+Thumbs.db
