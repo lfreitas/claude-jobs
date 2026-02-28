@@ -2,5 +2,5 @@
 <resources>
     <!-- Base app theme. Compose handles all visual styling;
          this exists only to set a window background and hide the action bar. -->
-    <style name="Theme.ClaudeJobs" parent="android:Theme.Material.NoTitleBar" />
+    <style name="Theme.ClaudeJobs" parent="android:Theme.Material.NoActionBar" />
 </resources>
