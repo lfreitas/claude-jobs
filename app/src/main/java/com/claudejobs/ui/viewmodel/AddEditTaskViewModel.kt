@@ -51,9 +51,10 @@ class AddEditTaskViewModel @Inject constructor(
     }
 
     fun saveTask(onSuccess: () -> Unit) {
-        nameError = name.isBlank()
-        promptError = prompt.isBlank()
-        if (nameError || promptError) return
+        val validation = TaskFormValidator.validate(name, prompt)
+        nameError = validation.nameError
+        promptError = validation.promptError
+        if (!validation.isValid) return
 
         viewModelScope.launch {
             val task = TaskEntity(

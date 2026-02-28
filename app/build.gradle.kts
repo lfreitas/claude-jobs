@@ -75,4 +75,8 @@ dependencies {
 
     implementation(libs.datastore.preferences)
     implementation(libs.tink.android)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.coroutines.test)
 }
