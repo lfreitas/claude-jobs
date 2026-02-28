@@ -23,8 +23,14 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Accept Android SDK licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+      - name: Install Android SDK 35 and accept licenses
+        run: |
+          # Locate sdkmanager regardless of cmdline-tools sub-version
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name "sdkmanager" -type f | head -1)
+          # Accept all pending licenses (exits non-zero when none remain, so || true)
+          yes | "$SDKMANAGER" --licenses 2>/dev/null || true
+          # Install the platform and build-tools the project requires
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
