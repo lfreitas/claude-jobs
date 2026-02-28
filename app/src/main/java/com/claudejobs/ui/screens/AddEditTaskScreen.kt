@@ -1,5 +1,6 @@
 package com.claudejobs.ui.screens
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -143,22 +144,11 @@ fun AddEditTaskScreen(
             Spacer(Modifier.height(8.dp))
 
             // Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            Button(
+                onClick = { viewModel.saveTask(onSaved) },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedButton(
-                    onClick = { viewModel.saveTask { /* run now handled by caller after save */ onSaved() } },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Save")
-                }
-                Button(
-                    onClick = { viewModel.saveTask(onSaved) },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(if (isEditing) "Update" else "Create")
-                }
+                Text(if (isEditing) "Update Task" else "Create Task")
             }
 
             Spacer(Modifier.height(16.dp))
@@ -234,7 +224,10 @@ private fun TimeRow(hour: Int, minute: Int, onShowPicker: () -> Unit) {
 @Composable
 private fun DayOfWeekRow(selected: Int, onSelect: (Int) -> Unit) {
     val days = listOf("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         days.forEachIndexed { idx, label ->
             FilterChip(
                 selected = selected == idx + 1,

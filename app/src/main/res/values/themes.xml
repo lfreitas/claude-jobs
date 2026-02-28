@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base app theme. Compose handles all visual styling;
+         this exists only to set a window background and hide the action bar. -->
+    <style name="Theme.ClaudeJobs" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>
