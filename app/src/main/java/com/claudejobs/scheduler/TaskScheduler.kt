@@ -5,7 +5,6 @@ import androidx.work.*
 import com.claudejobs.data.db.TaskEntity
 import com.claudejobs.worker.ClaudeTaskWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -74,34 +73,11 @@ class TaskScheduler @Inject constructor(@ApplicationContext private val context:
             .enqueueUniquePeriodicWork(task.workName, ExistingPeriodicWorkPolicy.UPDATE, request)
     }
 
-    private fun computeDailyDelay(hour: Int, minute: Int): Long {
-        val now = Calendar.getInstance()
-        val target = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            if (timeInMillis <= now.timeInMillis) add(Calendar.DAY_OF_YEAR, 1)
-        }
-        return target.timeInMillis - now.timeInMillis
-    }
+    private fun computeDailyDelay(hour: Int, minute: Int): Long =
+        TaskDelayCalculator.computeDailyDelay(hour, minute)
 
-    private fun computeWeeklyDelay(dayOfWeek: Int, hour: Int, minute: Int): Long {
-        // ISO dayOfWeek: 1=Mon…7=Sun → Calendar: Sun=1, Mon=2…Sat=7
-        val calDow = if (dayOfWeek == 7) Calendar.SUNDAY else dayOfWeek + 1
-        val now = Calendar.getInstance()
-        val target = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            val currentDow = get(Calendar.DAY_OF_WEEK)
-            var daysToAdd = (calDow - currentDow + 7) % 7
-            if (daysToAdd == 0 && timeInMillis <= now.timeInMillis) daysToAdd = 7
-            add(Calendar.DAY_OF_YEAR, daysToAdd)
-        }
-        return target.timeInMillis - now.timeInMillis
-    }
+    private fun computeWeeklyDelay(dayOfWeek: Int, hour: Int, minute: Int): Long =
+        TaskDelayCalculator.computeWeeklyDelay(dayOfWeek, hour, minute)
 
     private fun networkConstraints() = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED)

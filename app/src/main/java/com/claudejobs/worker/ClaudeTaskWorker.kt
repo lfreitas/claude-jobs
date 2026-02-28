@@ -12,8 +12,11 @@ import com.claudejobs.data.db.TaskRunEntity
 import com.claudejobs.data.prefs.ApiKeyStore
 import com.claudejobs.data.repository.TaskRunRepository
 import com.claudejobs.notification.NotificationHelper
+import com.claudejobs.data.api.dto.AnthropicErrorResponse
+import com.google.gson.Gson
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import retrofit2.HttpException
 
 @HiltWorker
 class ClaudeTaskWorker @AssistedInject constructor(
@@ -64,16 +67,29 @@ class ClaudeTaskWorker @AssistedInject constructor(
             notificationHelper.postSuccess(task.name, text.take(150), runId)
             Result.success()
         } catch (e: Exception) {
+            // For HTTP errors, extract the Anthropic API error message from the
+            // response body so the user sees the specific reason (e.g. "invalid model")
+            // rather than a generic "HTTP 400" string.
+            val errorMsg = if (e is HttpException) {
+                val rawBody = runCatching { e.response()?.errorBody()?.string() }.getOrNull()
+                val parsed = runCatching {
+                    Gson().fromJson(rawBody, AnthropicErrorResponse::class.java)
+                }.getOrNull()
+                val detail = parsed?.error?.message?.takeIf { it.isNotBlank() } ?: rawBody
+                "HTTP ${e.code()}: ${detail ?: e.message()}"
+            } else {
+                e.message ?: "Unknown error"
+            }
             val run = TaskRunEntity(
                 taskId = task.id,
                 taskName = task.name,
                 prompt = task.prompt,
                 status = "FAILED",
-                errorMessage = e.message ?: "Unknown error",
+                errorMessage = errorMsg,
                 executedAt = startedAt
             )
             taskRunRepository.insert(run)
-            notificationHelper.postError(task.name, e.message ?: "Unknown error")
+            notificationHelper.postError(task.name, errorMsg)
             if (runAttemptCount < 3) Result.retry() else Result.failure()
         }
     }
